@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcessPensionService.Models;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
@@ -21,13 +24,20 @@ namespace ProcessPensionService.Controllers
         [HttpPost]
         public async Task<IActionResult> GetProcessPensionAsync([FromBody]ProcessPensionInput pensionInput)
         {
-            if (pensionInput == null)
+            if (pensionInput.AaadharNumber.ToString().Length != 12)
             {
                 return Content("Invalid pensioner detail provided, please provide valid detail.");
             }
 
             var result = await GetPensionerDetail(pensionInput.AaadharNumber);
-            var penstionDetail =  CalculatePension(result);
+
+
+            if (result.PensionType == null && result.SalaryEarned == 0 && result.BankCategory == null && result.Allowences == 0)
+            {
+                return NotFound("Invalid Aadhar number.");
+            }
+
+            var penstionDetail = CalculatePension(result);
             return Ok(penstionDetail);
         }
 
@@ -35,10 +45,15 @@ namespace ProcessPensionService.Controllers
         private async Task<PentionerDetail> GetPensionerDetail(long aadhar)
         {
             PentionerDetail pentionerDetail = new PentionerDetail();
-
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:46731/api/pensionerdetail?Aadhar="+aadhar);
+            var token = await HttpContext.GetTokenAsync("access_token");
+            var request = new HttpRequestMessage(HttpMethod.Get, "http://20.204.190.194/api/pensionerdetail?Aadhar=" + aadhar);
+           
 
             var client = _contextFactory.CreateClient();
+
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            // client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",HttpContext.Session.GetString("token"));
 
             var response = await client.SendAsync(request);
 
