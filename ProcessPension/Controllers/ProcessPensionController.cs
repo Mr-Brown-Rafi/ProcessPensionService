@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProcessPensionService.Models;
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -46,7 +47,11 @@ namespace ProcessPensionService.Controllers
         {
             PentionerDetail pentionerDetail = new PentionerDetail();
             var token = await HttpContext.GetTokenAsync("access_token");
-            var request = new HttpRequestMessage(HttpMethod.Get, "http://20.204.190.194/api/pensionerdetail?Aadhar=" + aadhar);
+
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            string loc = env == "dev" ? "localhost:46731" : "20.204.190.194";
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"http://{loc}/api/pensionerdetail?Aadhar=" + aadhar);
            
 
             var client = _contextFactory.CreateClient();
