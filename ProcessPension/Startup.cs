@@ -73,6 +73,15 @@ namespace ProcessPensionService
                     });
             });
             services.AddHttpClient();
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy(name: "SampleCORS", builder =>
+                {
+                    builder.AllowAnyOrigin();
+                    builder.AllowAnyHeader();
+                    builder.AllowAnyMethod();
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -90,6 +99,7 @@ namespace ProcessPensionService
             }
 
             app.UseRouting();
+            app.UseCors("SampleCORS");
             app.UseAuthentication();
             app.UseAuthorization();
 
