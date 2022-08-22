@@ -87,7 +87,7 @@ namespace ProcessPensionService.Controllers
             else if (pentionerDetail.PensionType == "family")
             {
                 pensionDetail.PensionAmount = 0.5 * pentionerDetail.SalaryEarned + pentionerDetail.Allowences;
-                pensionDetail.BankServiceCharge = pentionerDetail.BankCategory == "private" ? 550 : 500;
+                pensionDetail.BankServiceCharge = pentionerDetail.BankCategory == "private" ? 600 : 500;
             }
 
             return pensionDetail;
